@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------
+   1. Global color tokens (DARK MODE ONLY)
+   --------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: 0 0% 4%; /* almost black */
+  --foreground: 0 0% 100%;
+
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 70%;
+
+  --primary: 26 98% 55%; /* orange accent */
+  --primary-foreground: 0 0% 0%;
+
+  --border: 0 0% 16%;
+  --input: 0 0% 16%;
+  --ring: 26 98% 55%;
+
+  /* brand color set */
+  --brand: 26 98% 55%;
+  --brand-soft: 26 98% 25%;
+  --brand-dark: 26 98% 40%;
+
+  --radius: 1rem;
 }
 
+/* ---------------------------------------------------------
+   2. Tailwind v4 theme tokens (inline)
+   --------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-brand: hsl(var(--brand));
+  --color-brand-soft: hsl(var(--brand-soft));
+  --color-brand-dark: hsl(var(--brand-dark));
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ---------------------------------------------------------
+   3. Base typography & background
+   --------------------------------------------------------- */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
