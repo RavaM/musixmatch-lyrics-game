@@ -5,7 +5,7 @@ import { Logo } from "./Logo";
 
 export const Interface = () => {
   return (
-    <div className="absolute inset-0 p-8 pointer-events-none z-100">
+    <div className="absolute inset-0 p-8 pointer-events-none z-40">
       <header className="flex flex-row justify-between w-full">
         <Logo clickable size={40} />
         <Button
