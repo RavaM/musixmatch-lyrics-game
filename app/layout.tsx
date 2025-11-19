@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Interface } from "@/components/Interface";
-import ColorBends from "@/components/ColorBends";
-import CurvedLoop from "@/components/CurvedLoop";
 import { AppBackground } from "@/components/AppBackground";
 
 const outfit = Outfit({
@@ -33,7 +31,9 @@ export default function RootLayout({
       >
         <Interface />
         <AppBackground />
-        {children}
+        <div className="w-full h-full px-8 py-40 relative pointer-events-none">
+          {children}
+        </div>
       </body>
     </html>
   );

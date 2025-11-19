@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { useHistoryStore } from "./history";
+import { usePlayerStore } from "./player";
 
 export type GameStatus = "idle" | "loading" | "in-progress" | "finished";
 
@@ -36,13 +38,17 @@ interface GameState extends GameConfig {
   timeLeft: number;
   score: number;
   answers: AnswerRecord[];
+  currentStreak: number;
+  bestStreak: number;
+  isFeedbackActive: boolean;
 
   // actions
   startGame: () => Promise<void>;
   answerQuestion: (answerId: string | null) => void;
   tick: () => void;
-  nextQuestion: () => void;
+  goToNextQuestion: () => void;
   resetGame: () => void;
+  setFeedbackActive: (active: boolean) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -58,6 +64,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   timeLeft: 20,
   score: 0,
   answers: [],
+  currentStreak: 0,
+  bestStreak: 0,
+  isFeedbackActive: false,
 
   // actions
   startGame: async () => {
@@ -96,13 +105,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxPointsPerQuestion,
       timeLeft,
     } = state;
+
     const question = questions[currentIndex];
     if (!question || state.status !== "in-progress") return;
 
     const isCorrect = answerId === question.correctAnswerId;
 
     const timeTaken = maxTimePerQuestion - timeLeft;
-    const timeFactor = Math.max(timeLeft, 0) / maxTimePerQuestion; // faster = more points
+    const timeFactor = Math.max(timeLeft, 0) / maxTimePerQuestion;
     const basePoints = isCorrect ? maxPointsPerQuestion : 0;
     const points = Math.round(basePoints * timeFactor);
 
@@ -114,13 +124,15 @@ export const useGameStore = create<GameState>((set, get) => ({
       points,
     };
 
+    const newStreak = isCorrect ? state.currentStreak + 1 : 0;
+    const bestStreak = Math.max(state.bestStreak, newStreak);
+
     set({
       answers: [...state.answers, answerRecord],
       score: state.score + points,
+      currentStreak: newStreak,
+      bestStreak,
     });
-
-    // Immediately move to next question
-    get().nextQuestion();
   },
 
   tick: () => {
@@ -128,20 +140,33 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (state.status !== "in-progress") return;
 
     if (state.timeLeft <= 1) {
-      // time up → treat as no answer
       get().answerQuestion(null);
+      get().goToNextQuestion();
     } else {
       set({ timeLeft: state.timeLeft - 1 });
     }
   },
 
-  nextQuestion: () => {
-    const { currentIndex, questions, maxTimePerQuestion } = get();
+  setFeedbackActive: (active: boolean) => set({ isFeedbackActive: active }),
+
+  goToNextQuestion: () => {
+    const state = get();
+    const { currentIndex, questions, maxTimePerQuestion } = state;
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= questions.length) {
       set({ status: "finished" });
-      // Here you can also persist game results to localStorage
+      const { currentPlayer } = usePlayerStore.getState();
+      const correctAnswers = state.answers.filter((a) => a.isCorrect).length;
+
+      useHistoryStore.getState().addResult({
+        playerId: currentPlayer?.id ?? null,
+        playerName: currentPlayer?.name ?? null,
+        score: state.score,
+        totalQuestions: questions.length,
+        correctAnswers,
+      });
+
       return;
     }
 
