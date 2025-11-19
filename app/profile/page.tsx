@@ -21,7 +21,7 @@ export default function MePage() {
   }
 
   return (
-    <main className="min-h-screen text-white">
+    <main className="h-full text-white flex flex-col flex-1 min-h-0">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-display">Your profile</h1>
         <Button asChild>
@@ -36,7 +36,7 @@ export default function MePage() {
         <Button onClick={logout}>Log out</Button>
       </section>
 
-      <section>
+      <section className="flex-1 flex flex-col">
         <h3 className="text-lg font-display mb-3">Your last {LAST_N} games</h3>
 
         {myGames.length === 0 ? (
@@ -44,7 +44,7 @@ export default function MePage() {
             No games yet. Go play your first round!
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="flex-1 overflow-y-auto space-y-2 pointer-events-auto">
             {myGames.map((g) => (
               <div
                 key={g.id}

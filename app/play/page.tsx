@@ -9,6 +9,7 @@ import { StreakHeader } from "@/components/play/StreakHeader";
 import { TimerBar } from "@/components/play/TimerBar";
 import { AnswerList } from "@/components/play/AnswerList";
 import Counter from "@/components/Counter";
+import CircularText from "@/components/CircularText";
 
 const FEEDBACK_DELAY = 2000;
 const MAX_TIME_PER_QUESTION = 20;
@@ -91,7 +92,7 @@ export default function PlayPage() {
   if (status === "loading" || status === "idle" || noQuestionAvailable) {
     return (
       <main className="h-full flex items-center justify-center text-white">
-        <p>Loading your questions…</p>
+        <CircularText text="LOADING ✦ SONGS ✦ " spinDuration={7} />
       </main>
     );
   }

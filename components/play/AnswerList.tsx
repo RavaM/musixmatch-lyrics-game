@@ -65,7 +65,9 @@ export const AnswerList = ({
               onClick={() => onAnswerClick(answer.id)}
             >
               {Icon && <Icon className="mr-2" />}
-              {answer.label}
+              <span className="overflow-hidden whitespace-nowrap text-ellipsis">
+                {answer.label}
+              </span>
             </Button>
           </motion.div>
         );

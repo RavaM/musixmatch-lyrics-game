@@ -3,6 +3,9 @@ import { useHistoryStore } from "./history";
 import { usePlayerStore } from "./player";
 import { AnswerRecord, GameState, Question } from "../types/game";
 import { usePlayerHistoryStore } from "./player-history";
+import { getMockQuestions } from "../mock/questions";
+
+const USE_MOCK = false;
 
 export const useGameStore = create<GameState>((set, get) => ({
   // config
@@ -36,6 +39,22 @@ export const useGameStore = create<GameState>((set, get) => ({
       bestStreak: 0,
       timeLeft: maxTimePerQuestion,
     });
+
+    if (USE_MOCK) {
+      const questions = getMockQuestions(totalQuestions);
+
+      // optional: fake network delay
+      setTimeout(() => {
+        set({
+          questions,
+          status: "in-progress",
+          currentIndex: 0,
+          timeLeft: maxTimePerQuestion,
+        });
+      }, 2000);
+
+      return;
+    }
 
     try {
       const res = await fetch("/api/questions", {

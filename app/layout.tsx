@@ -3,6 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Interface } from "@/components/Interface";
 import { AppBackground } from "@/components/AppBackground";
+import { SplashScreen } from "@/components/SplashScreen";
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -31,7 +32,8 @@ export default function RootLayout({
       >
         <Interface />
         <AppBackground />
-        <div className="w-full h-full px-8 py-40 relative pointer-events-none">
+        <SplashScreen />
+        <div className="w-full h-full px-8 pt-32 pb-10 relative pointer-events-none flex flex-col">
           {children}
         </div>
       </body>

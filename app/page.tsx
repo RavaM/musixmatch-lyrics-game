@@ -1,37 +1,18 @@
 "use client";
 
-import { SplashScreen } from "@/components/SplashScreen";
 import { Button } from "@/components/ui/button";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { LayoutGroup, motion } from "framer-motion";
+import { useState } from "react";
 import { usePlayerStore } from "@/lib/store/player";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useUiStore } from "@/lib/store/ui";
 
 export default function Home() {
-  const [showSplash, setShowSplash] = useState(true);
   const [name, setName] = useState("");
   const { currentPlayer, setPlayer } = usePlayerStore();
   const router = useRouter();
-
-  useEffect(() => {
-    const hasSeenSplash =
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("who-sings-splash-seen");
-
-    if (hasSeenSplash) {
-      setShowSplash(false);
-      return;
-    }
-
-    setShowSplash(true);
-    const timeout = setTimeout(() => {
-      setShowSplash(false);
-      sessionStorage.setItem("who-sings-splash-seen", "true");
-    }, 2500);
-
-    return () => clearTimeout(timeout);
-  }, []);
+  const { isSplashAnimationDone } = useUiStore();
 
   const handleStart = () => {
     const trimmed = name.trim();
@@ -50,12 +31,12 @@ export default function Home() {
   return (
     <LayoutGroup>
       <main className="text-white w-full h-full flex flex-col items-center overflow-hidden">
-        <AnimatePresence>{showSplash && <SplashScreen />}</AnimatePresence>
-
         <motion.div
-          className="flex flex-col items-center w-md aspect-square rounded-2xl text-center relative"
+          className="flex flex-col items-center w-full md:w-md aspect-square rounded-2xl text-center relative"
           initial={{ opacity: 0, y: 40 }}
-          animate={showSplash ? { opacity: 0, y: 40 } : { opacity: 1, y: 0 }}
+          animate={
+            isSplashAnimationDone ? { opacity: 0, y: 40 } : { opacity: 1, y: 0 }
+          }
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h1 className="uppercase text-4xl font-bold">
