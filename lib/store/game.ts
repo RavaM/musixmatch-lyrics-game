@@ -1,55 +1,8 @@
 import { create } from "zustand";
 import { useHistoryStore } from "./history";
 import { usePlayerStore } from "./player";
-
-export type GameStatus = "idle" | "loading" | "in-progress" | "finished";
-
-export interface AnswerOption {
-  id: string;
-  label: string; // artist name
-  isCorrect: boolean;
-}
-
-export interface Question {
-  id: string;
-  lyricLine: string;
-  answers: AnswerOption[];
-  correctAnswerId: string;
-}
-
-export interface AnswerRecord {
-  questionId: string;
-  selectedAnswerId: string | null;
-  isCorrect: boolean;
-  timeTaken: number; // in seconds
-  points: number;
-}
-
-interface GameConfig {
-  totalQuestions: number;
-  maxTimePerQuestion: number; // seconds
-  maxPointsPerQuestion: number;
-}
-
-interface GameState extends GameConfig {
-  status: GameStatus;
-  questions: Question[];
-  currentIndex: number;
-  timeLeft: number;
-  score: number;
-  answers: AnswerRecord[];
-  currentStreak: number;
-  bestStreak: number;
-  isFeedbackActive: boolean;
-
-  // actions
-  startGame: () => Promise<void>;
-  answerQuestion: (answerId: string | null) => void;
-  tick: () => void;
-  goToNextQuestion: () => void;
-  resetGame: () => void;
-  setFeedbackActive: (active: boolean) => void;
-}
+import { AnswerRecord, GameState, Question } from "../types/game";
+import { usePlayerHistoryStore } from "./player-history";
 
 export const useGameStore = create<GameState>((set, get) => ({
   // config
@@ -70,30 +23,50 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   // actions
   startGame: async () => {
-    set({ status: "loading", score: 0, answers: [], currentIndex: 0 });
-
-    // TODO: replace this with real Musixmatch-powered questions
-    const mockQuestions: Question[] = Array.from({
-      length: get().totalQuestions,
-    }).map((_, index) => ({
-      id: `q-${index}`,
-      lyricLine: `Mock lyric line #${index + 1} goes here...`,
-      correctAnswerId: "a-1",
-      answers: [
-        { id: "a-1", label: "Correct Artist", isCorrect: true },
-        { id: "a-2", label: "Wrong Artist 1", isCorrect: false },
-        { id: "a-3", label: "Wrong Artist 2", isCorrect: false },
-      ],
-    }));
-
-    const { maxTimePerQuestion } = get();
+    const { maxTimePerQuestion, totalQuestions } = get();
+    const { recentTrackIds } = usePlayerHistoryStore.getState();
 
     set({
-      questions: mockQuestions,
-      status: "in-progress",
+      status: "loading",
+      questions: [],
       currentIndex: 0,
+      score: 0,
+      answers: [],
+      currentStreak: 0,
+      bestStreak: 0,
       timeLeft: maxTimePerQuestion,
     });
+
+    try {
+      const res = await fetch("/api/questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          count: totalQuestions,
+          excludeTrackIds: recentTrackIds,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to load questions");
+      const data = await res.json();
+      const questions: Question[] = data.questions;
+
+      if (!questions || questions.length === 0) {
+        throw new Error("Empty question set");
+      }
+
+      set({
+        questions,
+        status: "in-progress",
+        currentIndex: 0,
+        timeLeft: maxTimePerQuestion,
+      });
+    } catch (error) {
+      console.error(error);
+      set({ status: "idle" });
+    }
   },
 
   answerQuestion: (answerId) => {
@@ -155,6 +128,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= questions.length) {
+      const trackIds = state.questions.map((q) => q.trackId);
+      usePlayerHistoryStore.getState().addUsedTracks(trackIds);
+
       set({ status: "finished" });
       const { currentPlayer } = usePlayerStore.getState();
       const correctAnswers = state.answers.filter((a) => a.isCorrect).length;
