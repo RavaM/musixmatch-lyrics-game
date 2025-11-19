@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <LayoutGroup>
-      <main className="text-white w-full h-full flex flex-col items-center overflow-hidden">
+      <main className="text-white w-full h-full flex flex-col items-center">
         <motion.div
           className="flex flex-col items-center w-full md:w-md aspect-square rounded-2xl text-center relative"
           initial={{ opacity: 0, y: 40 }}
@@ -60,7 +60,7 @@ export default function Home() {
             <input
               id="username"
               type="text"
-              className="w-full rounded-lg bg-muted/40 border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary pointer-events-auto"
+              className="w-full rounded-lg bg-muted/40 border border-border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary pointer-events-auto"
               placeholder="Your cool nickname"
               value={currentPlayer ? currentPlayer.name : name}
               onChange={(e) => {

@@ -28,12 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${outfit.variable} ${inter.variable} antialiased h-screen w-screen relative overflow-hidden`}
+        className={`${outfit.variable} ${inter.variable} antialiased h-svh w-screen relative overflow-hidden`}
       >
         <Interface />
         <AppBackground />
         <SplashScreen />
-        <div className="w-full h-full px-8 pt-32 pb-10 relative pointer-events-none flex flex-col">
+        <div className="w-full h-full px-8 py-32 relative pointer-events-none flex flex-col">
           {children}
         </div>
       </body>
