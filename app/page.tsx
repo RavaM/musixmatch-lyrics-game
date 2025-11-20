@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useUiStore } from "@/lib/store/ui";
 import { useSettingsStore } from "@/lib/store/settings";
 import { ChartCountryButton } from "@/components/ChartCountryButton";
+import { AnimatedText } from "@/components/AnimatedText";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -34,23 +35,40 @@ export default function Home() {
   return (
     <LayoutGroup>
       <main className="text-white w-full h-full flex flex-col items-center">
-        <motion.div
-          className="flex flex-col items-center w-full md:w-md aspect-square rounded-2xl text-center relative"
-          initial={{ opacity: 0, y: 40 }}
-          animate={
-            isSplashAnimationDone ? { opacity: 0, y: 40 } : { opacity: 1, y: 0 }
-          }
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <h1 className="uppercase text-4xl font-bold">
-            Welcome to the
+        <div className="flex flex-col items-center w-full md:w-md aspect-square rounded-2xl text-center relative">
+          <h1 className="uppercase text-4xl font-bold leading-tight">
+            <AnimatedText
+              text="Who Sings?"
+              active={isSplashAnimationDone}
+              as="span"
+              delay={0.2}
+            />
             <br />
-            ✦coolest✦
+            <AnimatedText
+              text="the ✦coolest✦"
+              as="span"
+              active={isSplashAnimationDone}
+              delay={0.5}
+            />
             <br />
-            lyrics game ;)
+            <AnimatedText
+              text="lyrics game ;)"
+              as="span"
+              active={isSplashAnimationDone}
+              delay={0.9}
+            />
           </h1>
 
-          <div className="mt-4 flex flex-col w-full max-w-sm mx-auto">
+          <motion.div
+            className="mt-4 flex flex-col w-full max-w-sm mx-auto"
+            initial={{ opacity: 0, y: 8 }}
+            animate={
+              isSplashAnimationDone
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 8 }
+            }
+            transition={{ delay: 1.2, ease: "easeOut" }}
+          >
             <label
               htmlFor="username"
               className="uppercase text-xs text-muted-foreground mb-2"
@@ -81,9 +99,18 @@ export default function Home() {
                 .
               </p>
             )}
-          </div>
+          </motion.div>
 
-          <div className="mt-6 flex flex-col items-center gap-2">
+          <motion.div
+            className="mt-6 flex flex-col items-center gap-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={
+              isSplashAnimationDone
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 8 }
+            }
+            transition={{ delay: 1.4, ease: "easeOut" }}
+          >
             <p className="uppercase text-[11px] tracking-wide text-muted-foreground">
               Choose country
             </p>
@@ -103,16 +130,26 @@ export default function Home() {
                 label="Italian charts"
               />
             </div>
-          </div>
+          </motion.div>
 
-          <Button
-            className="mt-10"
-            onClick={handleStart}
-            disabled={!currentPlayer && !name.trim()}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={
+              isSplashAnimationDone
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 8 }
+            }
+            transition={{ delay: 1.6, ease: "easeOut" }}
           >
-            Start the game
-          </Button>
-        </motion.div>
+            <Button
+              className="mt-10"
+              onClick={handleStart}
+              disabled={!currentPlayer && !name.trim()}
+            >
+              Start the game
+            </Button>
+          </motion.div>
+        </div>
       </main>
     </LayoutGroup>
   );

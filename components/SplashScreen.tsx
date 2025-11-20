@@ -9,9 +9,8 @@ import { useUiStore } from "@/lib/store/ui";
 export const SplashScreen = () => {
   const { isSplashAnimationDone, setSplashAnimationDone } = useUiStore();
   useEffect(() => {
-    setSplashAnimationDone(true);
     const timeout = setTimeout(() => {
-      setSplashAnimationDone(false);
+      setSplashAnimationDone(true);
     }, 4000);
 
     return () => clearTimeout(timeout);
@@ -19,7 +18,7 @@ export const SplashScreen = () => {
 
   return (
     <AnimatePresence>
-      {isSplashAnimationDone && (
+      {!isSplashAnimationDone && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-background"
           initial={{ opacity: 1 }}

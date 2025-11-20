@@ -23,7 +23,7 @@ export const AppBackground = () => {
         noise={0.08}
       />
 
-      <div className="fixed left-0 right-0 pointer-events-none -bottom-52 sm:bottom-0">
+      <div className="fixed left-0 right-0 pointer-events-none -bottom-52 sm:bottom-0 -z-1">
         <CurvedLoop
           marqueeText="Who ✦ Sings? ✦ by ✦ Musixmatch ✦"
           speed={3}
