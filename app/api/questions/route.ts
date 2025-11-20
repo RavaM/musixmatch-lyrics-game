@@ -1,10 +1,12 @@
 // app/api/questions/route.ts
 import { NextResponse } from "next/server";
 import { fetchQuestions } from "@/lib/musixmatch/questions";
+import { ChartCountry } from "@/lib/store/settings";
 
 type QuestionsRequestBody = {
   count?: number;
   excludeTrackIds?: number[];
+  country?: ChartCountry;
 };
 
 export async function POST(req: Request) {
@@ -12,8 +14,9 @@ export async function POST(req: Request) {
     const body = (await req.json()) as QuestionsRequestBody;
     const count = body.count ?? 10;
     const excludeTrackIds = body.excludeTrackIds ?? [];
+    const country = body.country ?? "us";
 
-    const questions = await fetchQuestions(count, excludeTrackIds);
+    const questions = await fetchQuestions(count, excludeTrackIds, country);
 
     return NextResponse.json({ questions });
   } catch (error) {

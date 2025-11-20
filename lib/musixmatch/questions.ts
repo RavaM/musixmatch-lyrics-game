@@ -6,6 +6,7 @@ import {
   getTrackSnippet,
   type TrackSummary,
 } from "./client";
+import { ChartCountry } from "../store/settings";
 
 // Extend TrackSummary for convenience (genres nested in primary_genres)
 type TrackWithGenres = TrackSummary;
@@ -59,7 +60,7 @@ function lineFromSnippet(snippet: string): string {
   return lines[0] || snippet.trim();
 }
 
-async function ensureTrackAndArtistCache(): Promise<{
+async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
   tracks: TrackWithGenres[];
   artists: ArtistPoolItem[];
 }> {
@@ -69,7 +70,7 @@ async function ensureTrackAndArtistCache(): Promise<{
   if (!tracksPromise && (!tracksCache || cacheExpired)) {
     tracksPromise = (async () => {
       const rawTracks = (await getPopularTracksWithLyrics({
-        country: "us",
+        country,
         pageSize: 150,
         page: 1,
       })) as TrackWithGenres[];
@@ -156,9 +157,10 @@ function buildAnswerOptions(params: {
 
 export async function fetchQuestions(
   count: number,
-  excludeTrackIds: number[] = []
+  excludeTrackIds: number[] = [],
+  country: ChartCountry
 ): Promise<Question[]> {
-  const { tracks, artists } = await ensureTrackAndArtistCache();
+  const { tracks, artists } = await ensureTrackAndArtistCache(country);
 
   const excludeSet = new Set(excludeTrackIds);
 

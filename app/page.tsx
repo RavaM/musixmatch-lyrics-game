@@ -7,12 +7,15 @@ import { usePlayerStore } from "@/lib/store/player";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUiStore } from "@/lib/store/ui";
+import { useSettingsStore } from "@/lib/store/settings";
+import { ChartCountryButton } from "@/components/ChartCountryButton";
 
 export default function Home() {
   const [name, setName] = useState("");
   const { currentPlayer, setPlayer } = usePlayerStore();
   const router = useRouter();
   const { isSplashAnimationDone } = useUiStore();
+  const { chartCountry, setChartCountry } = useSettingsStore();
 
   const handleStart = () => {
     const trimmed = name.trim();
@@ -78,6 +81,28 @@ export default function Home() {
                 .
               </p>
             )}
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <p className="uppercase text-[11px] tracking-wide text-muted-foreground">
+              Choose country
+            </p>
+            <div className="flex gap-3">
+              <ChartCountryButton
+                country="us"
+                selected={chartCountry === "us"}
+                onSelect={setChartCountry}
+                flagSrc="/flags/us.png"
+                label="US charts"
+              />
+              <ChartCountryButton
+                country="it"
+                selected={chartCountry === "it"}
+                onSelect={setChartCountry}
+                flagSrc="/flags/it.png"
+                label="Italian charts"
+              />
+            </div>
           </div>
 
           <Button

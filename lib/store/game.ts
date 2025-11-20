@@ -4,6 +4,7 @@ import { usePlayerStore } from "./player";
 import { AnswerRecord, GameState, Question } from "../types/game";
 import { usePlayerHistoryStore } from "./player-history";
 import { getMockQuestions } from "../mock/questions";
+import { useSettingsStore } from "./settings";
 
 const USE_MOCK = false;
 
@@ -28,6 +29,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   startGame: async () => {
     const { maxTimePerQuestion, totalQuestions } = get();
     const { recentTrackIds } = usePlayerHistoryStore.getState();
+    const { chartCountry } = useSettingsStore.getState();
 
     set({
       status: "loading",
@@ -65,6 +67,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         body: JSON.stringify({
           count: totalQuestions,
           excludeTrackIds: recentTrackIds,
+          country: chartCountry,
         }),
       });
 
