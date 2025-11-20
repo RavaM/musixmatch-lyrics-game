@@ -88,13 +88,33 @@ export async function getPopularTracksWithLyrics(options?: {
 }
 
 type SnippetBody = {
-  snippet?: { snippet_body: string };
+  snippet?: { snippet_body: string; snippet_language?: string };
 };
 
-export async function getTrackSnippet(trackId: number): Promise<string | null> {
+export async function getTrackSnippet(
+  trackId: number,
+  expectedLanguage?: string
+): Promise<string | null> {
   const body = await mmGet<SnippetBody>("track.snippet.get", {
     track_id: trackId,
   });
 
-  return body.snippet?.snippet_body ?? null;
+  const snippet = body.snippet;
+  if (!snippet || !snippet.snippet_body) {
+    return null;
+  }
+
+  const language = snippet.snippet_language?.toLowerCase();
+
+  // If a language is expected, filter here
+  if (
+    expectedLanguage &&
+    language &&
+    !language.startsWith(expectedLanguage.toLowerCase())
+  ) {
+    // e.g. expected "en", snippet_language is "it"
+    return null;
+  }
+
+  return snippet.snippet_body;
 }

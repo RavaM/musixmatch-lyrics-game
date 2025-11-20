@@ -17,6 +17,10 @@ type PlayerState = {
   logout: () => void;
 };
 
+function createId() {
+  return Math.random().toString(36).slice(2);
+}
+
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
@@ -39,7 +43,7 @@ export const usePlayerStore = create<PlayerState>()(
         }
 
         const newPlayer: Player = {
-          id: crypto.randomUUID(),
+          id: createId(),
           name,
           createdAt: new Date().toISOString(),
         };

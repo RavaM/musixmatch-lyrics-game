@@ -84,7 +84,6 @@ async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
   const now = Date.now();
   const cacheExpired = now - cache.lastCacheFill > CACHE_TTL_MS;
 
-  // If no promise in flight and cache is empty/expired, fetch for THIS country
   if (!cache.tracksPromise && (!cache.tracksCache || cacheExpired)) {
     cache.tracksPromise = (async () => {
       const rawTracks = (await getPopularTracksWithLyrics({
@@ -96,7 +95,7 @@ async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
       cache.tracksCache = rawTracks;
       cache.lastCacheFill = Date.now();
       cache.tracksPromise = null;
-      cache.artistPoolCache = null; // force rebuild for this country
+      cache.artistPoolCache = null;
 
       return rawTracks;
     })();
@@ -184,7 +183,8 @@ export async function fetchQuestions(
 
   const excludeSet = new Set(excludeTrackIds);
 
-  // Filter tracks to avoid recently seen ones when possible
+  const expectedLanguage = country === "it" ? "it" : "en";
+
   let candidateTracks = shuffle(
     tracks.filter(
       (t) =>
@@ -194,7 +194,6 @@ export async function fetchQuestions(
     )
   );
 
-  // If too few left after filtering, relax constraint (allow some repeats)
   if (candidateTracks.length < count * 2) {
     candidateTracks = shuffle(
       tracks.filter((t) => t.has_lyrics === 1 && t.instrumental !== 1)
@@ -206,7 +205,7 @@ export async function fetchQuestions(
   for (const track of candidateTracks) {
     if (questions.length >= count) break;
 
-    const snippet = await getTrackSnippet(track.track_id);
+    const snippet = await getTrackSnippet(track.track_id, expectedLanguage);
     if (!snippet) continue;
 
     const lyricLine = lineFromSnippet(snippet);

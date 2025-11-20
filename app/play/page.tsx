@@ -10,6 +10,10 @@ import { TimerBar } from "@/components/play/TimerBar";
 import { AnswerList } from "@/components/play/AnswerList";
 import Counter from "@/components/Counter";
 import CircularText from "@/components/CircularText";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ShareResultsButton } from "@/components/ShareResultsButton";
+import { useSettingsStore } from "@/lib/store/settings";
 
 const FEEDBACK_DELAY = 2000;
 const MAX_TIME_PER_QUESTION = 20;
@@ -24,6 +28,7 @@ export default function PlayPage() {
     currentStreak,
     bestStreak,
     isFeedbackActive,
+    answers,
     startGame,
     tick,
     answerQuestion,
@@ -32,6 +37,7 @@ export default function PlayPage() {
     setFeedbackActive,
   } = useGameStore();
   const { currentPlayer } = usePlayerStore();
+  const { chartCountry } = useSettingsStore();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -100,13 +106,117 @@ export default function PlayPage() {
   }
 
   if (status === "finished") {
+    const totalQuestions = questions.length;
+    const correctAnswers = answers.filter((a) => a.isCorrect).length;
+    const accuracy = totalQuestions
+      ? Math.round((correctAnswers / totalQuestions) * 100)
+      : 0;
+
     return (
-      <main className="h-full justify-center flex text-white">
-        <div className="z-10 bg-background/70 border border-border rounded-2xl p-8 text-center h-fit">
-          <h1 className="text-3xl font-display mb-4">Game Over</h1>
-          <p className="mb-2">Your score: {score}</p>
-          <Button onClick={() => resetGame()}>Play again</Button>
-        </div>
+      <main className="h-full flex items-center justify-center text-white relative">
+        <motion.div
+          className="z-10 bg-background/70 border border-border rounded-2xl px-8 py-10 w-full max-w-md text-center overflow-hidden fixed top-1/2  -translate-y-1/2"
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <div className="pointer-events-none absolute -top-24 -right-24 opacity-40">
+            <CircularText text="GAME ✦ OVER ✦" spinDuration={12} />
+          </div>
+
+          <motion.h1
+            className="text-3xl font-display mb-2 relative z-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            Game Over
+          </motion.h1>
+
+          <motion.p
+            className="text-sm text-muted-foreground mb-6 relative z-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.3 }}
+          >
+            Nice run{currentPlayer ? `, ${currentPlayer.name}` : ""}! Here’s how
+            you did.
+          </motion.p>
+
+          <motion.div
+            className="mb-6 relative z-10"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.22, duration: 0.3 }}
+          >
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              Total score
+            </p>
+            <div className="inline-flex items-baseline gap-1 px-4 py-2 rounded-xl bg-muted/40 border border-border">
+              <span className="text-3xl font-mono">{score}</span>
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">
+                pts
+              </span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-3 gap-3 text-xs mb-8 relative z-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.26, duration: 0.3 }}
+          >
+            <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Accuracy
+              </p>
+              <p className="text-lg font-semibold">{accuracy}%</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Correct
+              </p>
+              <p className="text-lg font-semibold">
+                {correctAnswers}/{totalQuestions}
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Best streak
+              </p>
+              <p className="text-lg font-semibold">{bestStreak}</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-col sm:flex-row gap-3 justify-center relative z-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.32, duration: 0.3 }}
+          >
+            <Button onClick={() => resetGame()}>Play again</Button>
+
+            <Button asChild>
+              <Link href="/profile">View your stats</Link>
+            </Button>
+
+            <Button asChild>
+              <Link href="/leaderboard">See leaderboard</Link>
+            </Button>
+          </motion.div>
+          <motion.div
+            className="flex flex-col sm:flex-row justify-center relative z-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.32, duration: 0.3 }}
+          >
+            <ShareResultsButton
+              score={score}
+              totalQuestions={questions.length}
+              country={chartCountry ?? "us"}
+            />
+          </motion.div>
+        </motion.div>
       </main>
     );
   }
@@ -114,7 +224,6 @@ export default function PlayPage() {
   return (
     <main className="h-full flex text-white relative justify-center">
       <div className="z-10 bg-background/70 border border-border rounded-2xl p-8 w-full max-w-md h-fit">
-        {/* Top info bar */}
         <div className="flex justify-between items-center mb-4 text-sm text-muted-foreground">
           <span>
             Question <span className="text-white">{currentIndex + 1}</span> /{" "}
