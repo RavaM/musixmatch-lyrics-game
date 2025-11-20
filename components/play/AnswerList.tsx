@@ -63,6 +63,7 @@ export const AnswerList = ({
               variant={variant}
               disabled={isLocked}
               onClick={() => onAnswerClick(answer.id)}
+              silentClick
             >
               {Icon && <Icon className="mr-2" />}
               <span className="overflow-hidden whitespace-nowrap text-ellipsis">

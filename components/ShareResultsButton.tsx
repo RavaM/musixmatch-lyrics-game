@@ -9,11 +9,7 @@ type ShareResultsProps = {
   country: "us" | "it";
 };
 
-export function ShareResultsButton({
-  score,
-  totalQuestions,
-  country,
-}: ShareResultsProps) {
+export function ShareResultsButton({ score, country }: ShareResultsProps) {
   const shareText = `
     🎵 Who Sings? — My Results
     Score: ${score}

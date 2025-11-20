@@ -14,6 +14,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShareResultsButton } from "@/components/ShareResultsButton";
 import { useSettingsStore } from "@/lib/store/settings";
+import { playCorrectSound, playWrongSound } from "@/lib/sound";
 
 const FEEDBACK_DELAY = 2000;
 const MAX_TIME_PER_QUESTION = 20;
@@ -77,9 +78,18 @@ export default function PlayPage() {
   const handleAnswerClick = (answerId: string) => {
     if (isLocked || !currentQuestion || status !== "in-progress") return;
 
+    const isCorrect = answerId === currentQuestion.correctAnswerId;
+
     setSelectedAnswerId(answerId);
     setIsLocked(true);
     setFeedbackActive(true);
+
+    // 🔊 sound
+    if (isCorrect) {
+      playCorrectSound();
+    } else {
+      playWrongSound();
+    }
 
     answerQuestion(answerId);
 
@@ -115,7 +125,7 @@ export default function PlayPage() {
     return (
       <main className="h-full flex items-center justify-center text-white relative">
         <motion.div
-          className="z-10 bg-background/70 border border-border rounded-2xl px-8 py-10 w-full max-w-md text-center overflow-hidden fixed top-1/2  -translate-y-1/2"
+          className="z-10 bg-background/70 border border-border rounded-2xl px-8 py-10 max-w-md text-center overflow-hidden fixed top-1/2  -translate-y-1/2"
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}

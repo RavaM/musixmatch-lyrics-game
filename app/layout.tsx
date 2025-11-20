@@ -5,6 +5,7 @@ import { Interface } from "@/components/Interface";
 import { AppBackground } from "@/components/AppBackground";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
+import { BackgroundMusic } from "@/components/BackgroundMusic";
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Interface />
         <AppBackground />
         <SplashScreen />
+        <BackgroundMusic />
         <div className="w-full h-full px-8 pt-32 pb-8 relative pointer-events-none flex flex-col">
           {children}
         </div>
