@@ -155,6 +155,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       set({ status: "finished" });
       const { currentPlayer } = usePlayerStore.getState();
+      const { chartCountry } = useSettingsStore.getState();
       const correctAnswers = state.answers.filter((a) => a.isCorrect).length;
 
       useHistoryStore.getState().addResult({
@@ -163,6 +164,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         score: state.score,
         totalQuestions: questions.length,
         correctAnswers,
+        country: chartCountry,
       });
 
       return;

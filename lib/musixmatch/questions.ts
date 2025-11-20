@@ -19,16 +19,32 @@ export type ArtistPoolItem = {
 };
 
 // ----------------------
-// Module-level caches
+// Module-level caches (per country)
 // ----------------------
 
-let tracksCache: TrackWithGenres[] | null = null;
-let tracksPromise: Promise<TrackWithGenres[]> | null = null;
-let artistPoolCache: ArtistPoolItem[] | null = null;
+type CountryCache = {
+  tracksCache: TrackWithGenres[] | null;
+  tracksPromise: Promise<TrackWithGenres[]> | null;
+  artistPoolCache: ArtistPoolItem[] | null;
+  lastCacheFill: number;
+};
 
-// optional: basic cache expiry (e.g. refresh every 2 hours)
 const CACHE_TTL_MS = 2 * 60 * 60 * 1000;
-let lastCacheFill = 0;
+
+const countryCaches: Record<ChartCountry, CountryCache> = {
+  us: {
+    tracksCache: null,
+    tracksPromise: null,
+    artistPoolCache: null,
+    lastCacheFill: 0,
+  },
+  it: {
+    tracksCache: null,
+    tracksPromise: null,
+    artistPoolCache: null,
+    lastCacheFill: 0,
+  },
+};
 
 // ----------------------
 // Helpers
@@ -64,28 +80,32 @@ async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
   tracks: TrackWithGenres[];
   artists: ArtistPoolItem[];
 }> {
+  const cache = countryCaches[country];
   const now = Date.now();
-  const cacheExpired = now - lastCacheFill > CACHE_TTL_MS;
+  const cacheExpired = now - cache.lastCacheFill > CACHE_TTL_MS;
 
-  if (!tracksPromise && (!tracksCache || cacheExpired)) {
-    tracksPromise = (async () => {
+  // If no promise in flight and cache is empty/expired, fetch for THIS country
+  if (!cache.tracksPromise && (!cache.tracksCache || cacheExpired)) {
+    cache.tracksPromise = (async () => {
       const rawTracks = (await getPopularTracksWithLyrics({
         country,
         pageSize: 150,
         page: 1,
       })) as TrackWithGenres[];
 
-      tracksCache = rawTracks;
-      lastCacheFill = Date.now();
-      tracksPromise = null;
-      artistPoolCache = null; // force rebuild
+      cache.tracksCache = rawTracks;
+      cache.lastCacheFill = Date.now();
+      cache.tracksPromise = null;
+      cache.artistPoolCache = null; // force rebuild for this country
+
       return rawTracks;
     })();
   }
 
-  const tracks = tracksCache ?? (await tracksPromise!);
+  const tracks = cache.tracksCache ?? (await cache.tracksPromise!);
 
-  if (!artistPoolCache) {
+  // Build artist pool per country if not cached yet
+  if (!cache.artistPoolCache) {
     const byId = new Map<number, ArtistPoolItem>();
 
     for (const t of tracks) {
@@ -100,10 +120,10 @@ async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
       }
     }
 
-    artistPoolCache = Array.from(byId.values());
+    cache.artistPoolCache = Array.from(byId.values());
   }
 
-  return { tracks, artists: artistPoolCache };
+  return { tracks, artists: cache.artistPoolCache };
 }
 
 /**

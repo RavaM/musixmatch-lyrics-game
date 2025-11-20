@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { ChartCountry } from "@/lib/store/settings";
 
 export type GameResult = {
   id: string;
@@ -10,6 +11,7 @@ export type GameResult = {
   score: number;
   totalQuestions: number;
   correctAnswers: number;
+  country: ChartCountry;
   createdAt: string;
 };
 
