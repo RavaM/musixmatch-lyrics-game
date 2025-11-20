@@ -1,3 +1,4 @@
+// lib/store/player.ts
 "use client";
 
 import { create } from "zustand";
@@ -6,33 +7,53 @@ import { persist } from "zustand/middleware";
 export type Player = {
   id: string;
   name: string;
+  createdAt: string;
 };
 
 type PlayerState = {
   currentPlayer: Player | null;
-  setPlayer: (name: string, avatarId?: string | null) => void;
+  players: Player[];
+  setPlayer: (name: string) => void;
   logout: () => void;
 };
 
-function createId() {
-  return Math.random().toString(36).slice(2);
-}
-
 export const usePlayerStore = create<PlayerState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentPlayer: null,
-      setPlayer: (name) =>
+      players: [],
+
+      setPlayer: (rawName: string) => {
+        const name = rawName.trim();
+        if (!name) return;
+
+        const { players } = get();
+
+        const existing = players.find(
+          (p) => p.name.toLowerCase() === name.toLowerCase()
+        );
+
+        if (existing) {
+          set({ currentPlayer: existing });
+          return;
+        }
+
+        const newPlayer: Player = {
+          id: crypto.randomUUID(),
+          name,
+          createdAt: new Date().toISOString(),
+        };
+
         set({
-          currentPlayer: {
-            id: createId(),
-            name,
-          },
-        }),
+          currentPlayer: newPlayer,
+          players: [...players, newPlayer],
+        });
+      },
+
       logout: () => set({ currentPlayer: null }),
     }),
     {
-      name: "who-sings-player",
+      name: "who-sings-players",
     }
   )
 );

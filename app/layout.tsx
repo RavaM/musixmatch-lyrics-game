@@ -33,7 +33,7 @@ export default function RootLayout({
         <Interface />
         <AppBackground />
         <SplashScreen />
-        <div className="w-full h-full px-8 py-32 relative pointer-events-none flex flex-col">
+        <div className="w-full h-full px-8 pt-32 pb-8 relative pointer-events-none flex flex-col">
           {children}
         </div>
       </body>

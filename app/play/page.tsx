@@ -92,7 +92,9 @@ export default function PlayPage() {
   if (status === "loading" || status === "idle" || noQuestionAvailable) {
     return (
       <main className="h-full flex items-center justify-center text-white">
-        <CircularText text="LOADING ✦ SONGS ✦ " spinDuration={7} />
+        <div className="fixed top-1/2 left-1/2 -translate-1/2">
+          <CircularText text="LOADING ✦ SONGS ✦ " spinDuration={7} />
+        </div>
       </main>
     );
   }

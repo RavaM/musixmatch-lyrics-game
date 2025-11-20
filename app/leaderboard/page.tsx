@@ -7,20 +7,35 @@ import Link from "next/link";
 export default function LeaderboardPage() {
   const { results } = useHistoryStore();
 
-  // Aggregate best score per player
-  const bestByPlayer = results.reduce<
-    Record<string, { name: string; score: number }>
+  // Aggregate best score PER NAME (so "Marco" is always the same player)
+  const byName = results.reduce<
+    Record<string, { name: string; bestScore: number; gamesPlayed: number }>
   >((acc, r) => {
-    const key = r.playerId ?? r.playerName ?? "anonymous";
-    const name = r.playerName ?? "Anonymous";
-    if (!acc[key] || r.score > acc[key].score) {
-      acc[key] = { name, score: r.score };
+    const rawName = r.playerName?.trim();
+    const displayName = rawName && rawName.length > 0 ? rawName : "Anonymous";
+    const key = displayName.toLowerCase();
+
+    const current = acc[key];
+
+    if (!current) {
+      acc[key] = {
+        name: displayName,
+        bestScore: r.score,
+        gamesPlayed: 1,
+      };
+    } else {
+      acc[key] = {
+        name: displayName,
+        bestScore: Math.max(current.bestScore, r.score),
+        gamesPlayed: current.gamesPlayed + 1,
+      };
     }
+
     return acc;
   }, {});
 
-  const leaderboard = Object.values(bestByPlayer)
-    .sort((a, b) => b.score - a.score)
+  const leaderboard = Object.values(byName)
+    .sort((a, b) => b.bestScore - a.bestScore)
     .slice(0, 10);
 
   return (
@@ -40,13 +55,18 @@ export default function LeaderboardPage() {
         <ol className="space-y-2">
           {leaderboard.map((entry, index) => (
             <li
-              key={entry.name + index}
+              key={entry.name}
               className="flex justify-between items-center bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm"
             >
               <span>
                 #{index + 1} {entry.name}
+                {entry.gamesPlayed > 1 && (
+                  <span className="ml-2 text-[11px] text-muted-foreground">
+                    · {entry.gamesPlayed} games
+                  </span>
+                )}
               </span>
-              <span className="font-mono">{entry.score}</span>
+              <span className="font-mono">{entry.bestScore}</span>
             </li>
           ))}
         </ol>

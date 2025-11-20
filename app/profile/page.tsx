@@ -13,7 +13,9 @@ export default function MePage() {
   const { results } = useHistoryStore();
 
   const myGames = currentPlayer
-    ? results.filter((r) => r.playerId === currentPlayer.id).slice(0, LAST_N)
+    ? results
+        .filter((r) => r.playerName === currentPlayer.name)
+        .slice(0, LAST_N)
     : [];
 
   if (!currentPlayer) {
@@ -36,7 +38,7 @@ export default function MePage() {
         <Button onClick={logout}>Log out</Button>
       </section>
 
-      <section className="flex-1 flex flex-col">
+      <section className="flex-1 flex flex-col overflow-y-auto">
         <h3 className="text-lg font-display mb-3">Your last {LAST_N} games</h3>
 
         {myGames.length === 0 ? (
