@@ -1,5 +1,3 @@
-// lib/musixmatch/questions.ts
-
 import type { Question, AnswerOption } from "@/lib/types/game";
 import {
   getPopularTracksWithLyrics,
@@ -8,7 +6,6 @@ import {
 } from "./client";
 import { ChartCountry } from "../store/settings";
 
-// Extend TrackSummary for convenience (genres nested in primary_genres)
 type TrackWithGenres = TrackSummary;
 
 export type ArtistPoolItem = {
@@ -17,10 +14,6 @@ export type ArtistPoolItem = {
   genreId?: number;
   genreName?: string;
 };
-
-// ----------------------
-// Module-level caches (per country)
-// ----------------------
 
 type CountryCache = {
   tracksCache: TrackWithGenres[] | null;
@@ -45,10 +38,6 @@ const countryCaches: Record<ChartCountry, CountryCache> = {
     lastCacheFill: 0,
   },
 };
-
-// ----------------------
-// Helpers
-// ----------------------
 
 function extractGenre(track: TrackWithGenres): {
   genreId?: number;
@@ -103,7 +92,6 @@ async function ensureTrackAndArtistCache(country: ChartCountry): Promise<{
 
   const tracks = cache.tracksCache ?? (await cache.tracksPromise!);
 
-  // Build artist pool per country if not cached yet
   if (!cache.artistPoolCache) {
     const byId = new Map<number, ArtistPoolItem>();
 
@@ -170,10 +158,6 @@ function buildAnswerOptions(params: {
   return shuffle(answers);
 }
 
-// ----------------------
-// Public: fetchQuestions
-// ----------------------
-
 export async function fetchQuestions(
   count: number,
   excludeTrackIds: number[] = [],
@@ -181,57 +165,73 @@ export async function fetchQuestions(
 ): Promise<Question[]> {
   const { tracks, artists } = await ensureTrackAndArtistCache(country);
 
-  const excludeSet = new Set(excludeTrackIds);
-
   const expectedLanguage = country === "it" ? "it" : "en";
 
-  let candidateTracks = shuffle(
-    tracks.filter(
-      (t) =>
-        t.has_lyrics === 1 &&
-        t.instrumental !== 1 &&
-        !excludeSet.has(t.track_id)
-    )
+  // 1. Base playable pool: per-country, with lyrics, non-instrumental
+  const playableTracks = tracks.filter(
+    (t) => t.has_lyrics === 1 && t.instrumental !== 1
   );
 
-  if (candidateTracks.length < count * 2) {
-    candidateTracks = shuffle(
-      tracks.filter((t) => t.has_lyrics === 1 && t.instrumental !== 1)
-    );
-  }
+  const excludeSet = new Set(excludeTrackIds);
+
+  // 2. Prefer fresh tracks, but keep seen ones as backup
+  const freshTracks = shuffle(
+    playableTracks.filter((t) => !excludeSet.has(t.track_id))
+  );
+  const seenTracks = shuffle(
+    playableTracks.filter((t) => excludeSet.has(t.track_id))
+  );
+
+  // Prefer fresh, then seen
+  const candidateTracks = [...freshTracks, ...seenTracks];
 
   const questions: Question[] = [];
+  const usedTrackIds = new Set<number>();
 
-  for (const track of candidateTracks) {
-    if (questions.length >= count) break;
+  async function fillQuestions(preferredLanguage?: string) {
+    for (const track of candidateTracks) {
+      if (questions.length >= count) break;
+      if (usedTrackIds.has(track.track_id)) continue;
 
-    const snippet = await getTrackSnippet(track.track_id, expectedLanguage);
-    if (!snippet) continue;
+      // 3. Get snippet with optional language filtering
+      const snippet = await getTrackSnippet(track.track_id, preferredLanguage);
+      if (!snippet) continue;
 
-    const lyricLine = lineFromSnippet(snippet);
-    if (!lyricLine || lyricLine.length < 5) continue;
+      const lyricLine = lineFromSnippet(snippet);
+      if (!lyricLine || lyricLine.length < 5) continue;
 
-    const { genreId } = extractGenre(track);
+      const { genreId } = extractGenre(track);
 
-    const answers = buildAnswerOptions({
-      correctArtistId: track.artist_id,
-      correctArtistName: track.artist_name,
-      genreId,
-      artistPool: artists,
-      numOptions: 3,
-    });
+      const answers = buildAnswerOptions({
+        correctArtistId: track.artist_id,
+        correctArtistName: track.artist_name,
+        genreId,
+        artistPool: artists,
+        numOptions: 3,
+      });
 
-    const correct = answers.find((a) => a.isCorrect)!;
+      const correct = answers.find((a) => a.isCorrect)!;
 
-    questions.push({
-      id: `track-${track.track_id}`,
-      trackId: track.track_id,
-      lyricLine,
-      artistId: track.artist_id,
-      artistName: track.artist_name,
-      correctAnswerId: correct.id,
-      answers,
-    });
+      questions.push({
+        id: `track-${track.track_id}`,
+        trackId: track.track_id,
+        lyricLine,
+        artistId: track.artist_id,
+        artistName: track.artist_name,
+        correctAnswerId: correct.id,
+        answers,
+      });
+
+      usedTrackIds.add(track.track_id);
+    }
+  }
+
+  // Pass 1: try to respect language (it/en)
+  await fillQuestions(expectedLanguage);
+
+  // Pass 2: if not enough questions, relax language and accept any snippet
+  if (questions.length < count) {
+    await fillQuestions(undefined);
   }
 
   return questions;
