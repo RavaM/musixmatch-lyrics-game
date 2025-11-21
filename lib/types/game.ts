@@ -1,8 +1,13 @@
-export type GameStatus = "idle" | "loading" | "in-progress" | "finished";
+export type GameStatus =
+  | "idle"
+  | "loading"
+  | "in-progress"
+  | "finished"
+  | "error";
 
 export interface AnswerOption {
   id: string;
-  label: string; // artist name
+  label: string;
   isCorrect: boolean;
 }
 
@@ -20,7 +25,7 @@ export interface AnswerRecord {
   questionId: string;
   selectedAnswerId: string | null;
   isCorrect: boolean;
-  timeTaken: number; // in seconds
+  timeTaken: number;
   points: number;
 }
 
@@ -40,6 +45,7 @@ export interface GameState extends GameConfig {
   currentStreak: number;
   bestStreak: number;
   isFeedbackActive: boolean;
+  error: string | null;
 
   // actions
   startGame: () => Promise<void>;

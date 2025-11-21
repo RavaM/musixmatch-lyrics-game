@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { ShareResultsButton } from "@/components/ShareResultsButton";
 import { useSettingsStore } from "@/lib/store/settings";
 import { useSound } from "@/lib/hooks/useSound";
+import { useRouter } from "next/navigation";
 
 const FEEDBACK_DELAY = 2000;
 const MAX_TIME_PER_QUESTION = 20;
@@ -30,6 +31,7 @@ export default function PlayPage() {
     bestStreak,
     isFeedbackActive,
     answers,
+    error,
     startGame,
     tick,
     answerQuestion,
@@ -40,6 +42,9 @@ export default function PlayPage() {
   const { currentPlayer } = usePlayerStore();
   const { chartCountry } = useSettingsStore();
   const { playCorrect, playWrong } = useSound();
+  const router = useRouter();
+
+  console.log("status is", status);
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -68,10 +73,6 @@ export default function PlayPage() {
   }, [resetGame]);
 
   const currentQuestion = questions[currentIndex];
-  const noQuestionAvailable =
-    !currentQuestion ||
-    questions.length === 0 ||
-    currentIndex >= questions.length;
 
   const handleAnswerClick = (answerId: string) => {
     if (isLocked || !currentQuestion || status !== "in-progress") return;
@@ -102,7 +103,41 @@ export default function PlayPage() {
     return <NotLogged />;
   }
 
-  if (status === "loading" || status === "idle" || noQuestionAvailable) {
+  if (status === "error") {
+    return (
+      <main className="h-full flex items-center justify-center text-white">
+        <div className="z-10 bg-background/70 border border-border rounded-2xl p-8 text-center max-w-sm fixed top-1/2 left-1/2 -translate-1/2">
+          <h1 className="text-2xl font-display mb-2">Oops!</h1>
+          <p className="text-sm text-muted-foreground mb-4">
+            We couldn&apos;t load new songs right now.
+            <br />
+            {error && (
+              <span className="mt-1 block text-xs opacity-70">{error}</span>
+            )}
+          </p>
+          <div className="flex gap-2 justify-center">
+            <Button
+              onClick={() => {
+                startGame();
+              }}
+            >
+              Try again
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                router.push("/");
+              }}
+            >
+              Back home
+            </Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (status === "loading" || status === "idle") {
     return (
       <main className="h-full flex items-center justify-center text-white">
         <div className="fixed top-1/2 left-1/2 -translate-1/2">

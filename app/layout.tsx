@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Musixmatch Quiz",
+  title: "Who Sings? | Musixmatch",
   description: "Get ready to test your music knowledge!",
 };
 
@@ -40,6 +40,9 @@ export default function RootLayout({
           {children}
         </div>
         <Toaster />
+        <footer className="fixed flex bottom-4 text-xs w-full justify-center pointer-events-none">
+          Made with ❤︎ by Marco
+        </footer>
       </body>
     </html>
   );

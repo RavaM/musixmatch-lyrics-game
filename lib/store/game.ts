@@ -24,6 +24,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentStreak: 0,
   bestStreak: 0,
   isFeedbackActive: false,
+  error: null,
 
   // actions
   startGame: async () => {
@@ -40,12 +41,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentStreak: 0,
       bestStreak: 0,
       timeLeft: maxTimePerQuestion,
+      error: null,
     });
 
     if (USE_MOCK) {
       const questions = getMockQuestions(totalQuestions);
 
-      // optional: fake network delay
       setTimeout(() => {
         set({
           questions,
@@ -87,7 +88,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       });
     } catch (error) {
       console.error(error);
-      set({ status: "idle" });
+      set({
+        status: "error",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong loading questions.",
+      });
     }
   },
 
@@ -184,6 +191,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       timeLeft: get().maxTimePerQuestion,
       score: 0,
       answers: [],
+      error: null,
     });
   },
 }));

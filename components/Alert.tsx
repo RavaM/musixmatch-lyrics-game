@@ -10,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useGameStore } from "@/lib/store/game";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
@@ -22,12 +21,9 @@ export const Alert = ({
   setPendingHref: Dispatch<SetStateAction<string | null>>;
 }) => {
   const router = useRouter();
-  const { resetGame } = useGameStore();
 
   const handleConfirmLeave = () => {
     if (!pendingHref) return;
-    // We consider the game abandoned and reset it
-    resetGame();
     router.push(pendingHref);
     setPendingHref(null);
   };

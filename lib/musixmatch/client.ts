@@ -1,5 +1,3 @@
-// lib/musixmatch/client.ts
-
 const BASE_URL = "https://api.musixmatch.com/ws/1.1";
 
 type MMResponse<TBody> = {

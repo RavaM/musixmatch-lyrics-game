@@ -5,6 +5,8 @@ import { useHistoryStore } from "@/lib/store/history";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import type { ChartCountry } from "@/lib/store/settings";
+import { usePlayerStore } from "@/lib/store/player";
+import { LeaderboardSection } from "@/components/leaderboard/LeaderboardSection";
 
 const headerVariants: Variants = {
   hidden: { opacity: 0, y: -10 },
@@ -15,24 +17,10 @@ const headerVariants: Variants = {
   },
 };
 
-const listVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: "easeOut" },
-  },
+type HistoryResult = {
+  playerName: string | null;
+  score: number;
+  country?: ChartCountry;
 };
 
 type LeaderboardEntry = {
@@ -76,12 +64,18 @@ function buildLeaderboardForCountry(
 
   return Object.values(byName).sort((a, b) => b.bestScore - a.bestScore);
 }
-
 export default function LeaderboardPage() {
   const { results } = useHistoryStore();
+  const { currentPlayer } = usePlayerStore();
 
-  const usLeaderboard = buildLeaderboardForCountry(results, "us").slice(0, 10);
-  const itLeaderboard = buildLeaderboardForCountry(results, "it").slice(0, 10);
+  const usLeaderboard = buildLeaderboardForCountry(
+    results as HistoryResult[],
+    "us"
+  ).slice(0, 10);
+  const itLeaderboard = buildLeaderboardForCountry(
+    results as HistoryResult[],
+    "it"
+  ).slice(0, 10);
 
   const noData = usLeaderboard.length === 0 && itLeaderboard.length === 0;
 
@@ -112,89 +106,22 @@ export default function LeaderboardPage() {
         </motion.p>
       ) : (
         <div className="grid gap-8 md:grid-cols-2">
-          {/* US leaderboard */}
-          <section>
-            <motion.div
-              className="flex items-center gap-2 mb-3"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut", delay: 0.15 }}
-            >
-              <img
-                src="/flags/us.png"
-                alt="US flag"
-                className="w-5 h-5 rounded-[2px]"
-              />
-              <h2 className="text-lg font-display">US Leaderboard</h2>
-            </motion.div>
-
-            {usLeaderboard.length === 0 ? (
-              <p className="text-muted-foreground text-xs">No US games yet.</p>
-            ) : (
-              <motion.ol className="space-y-2" variants={listVariants}>
-                {usLeaderboard.map((entry, index) => (
-                  <motion.li
-                    key={`${entry.name}-us`}
-                    variants={itemVariants}
-                    className="flex justify-between items-center bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <span>
-                      #{index + 1} {entry.name}
-                      {entry.gamesPlayed > 1 && (
-                        <span className="ml-2 text-[11px] text-muted-foreground">
-                          · {entry.gamesPlayed} games
-                        </span>
-                      )}
-                    </span>
-                    <span className="font-mono">{entry.bestScore}</span>
-                  </motion.li>
-                ))}
-              </motion.ol>
-            )}
-          </section>
-
-          {/* IT leaderboard */}
-          <section>
-            <motion.div
-              className="flex items-center gap-2 mb-3"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
-            >
-              <img
-                src="/flags/it.png"
-                alt="IT flag"
-                className="w-5 h-5 rounded-[2px]"
-              />
-              <h2 className="text-lg font-display">Italy Leaderboard</h2>
-            </motion.div>
-
-            {itLeaderboard.length === 0 ? (
-              <p className="text-muted-foreground text-xs">
-                No Italian games yet.
-              </p>
-            ) : (
-              <motion.ol className="space-y-2" variants={listVariants}>
-                {itLeaderboard.map((entry, index) => (
-                  <motion.li
-                    key={`${entry.name}-it`}
-                    variants={itemVariants}
-                    className="flex justify-between items-center bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <span>
-                      #{index + 1} {entry.name}
-                      {entry.gamesPlayed > 1 && (
-                        <span className="ml-2 text-[11px] text-muted-foreground">
-                          · {entry.gamesPlayed} games
-                        </span>
-                      )}
-                    </span>
-                    <span className="font-mono">{entry.bestScore}</span>
-                  </motion.li>
-                ))}
-              </motion.ol>
-            )}
-          </section>
+          <LeaderboardSection
+            title="US Leaderboard"
+            flagSrc="/flags/us.png"
+            emptyText="No US games yet."
+            entries={usLeaderboard}
+            delay={0.15}
+            currentPlayerName={currentPlayer?.name ?? null}
+          />
+          <LeaderboardSection
+            title="Italy Leaderboard"
+            flagSrc="/flags/it.png"
+            emptyText="No Italian games yet."
+            entries={itLeaderboard}
+            delay={0.2}
+            currentPlayerName={currentPlayer?.name ?? null}
+          />
         </div>
       )}
     </motion.main>

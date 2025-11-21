@@ -25,12 +25,11 @@ export const SplashScreen = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Circle wrapper gets the big exit animation */}
           <motion.div
             initial={{ scale: 1, opacity: 1 }}
             exit={{ scale: 6, opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
           >
             <CircularText
               text="WHO ✦ SINGS? ✦ MUSIXMATCH ✦ "
@@ -39,7 +38,6 @@ export const SplashScreen = () => {
             />
           </motion.div>
 
-          {/* Logo stays centered; layoutId lets it morph to the header logo */}
           <Logo clickable={false} size={100} />
         </motion.div>
       )}

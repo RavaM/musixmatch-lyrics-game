@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/hooks/useSound";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 pointer-events-auto cursor-pointer",
+  "relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-0 focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer pointer-events-auto hover:scale-[1.03] hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] before:absolute before:inset-0 before:rounded-md before:border before:border-white/0 before:transition-all before:pointer-events-none hover:before:border-white/40",
   {
     variants: {
       variant: {
         default:
-          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground backdrop-blur-xl",
+          "border border-input bg-transparent shadow-sm backdrop-blur-xl",
         success:
           "border border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
         destructive:

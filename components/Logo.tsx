@@ -2,14 +2,18 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
 
 type LogoProps = {
   clickable?: boolean;
-  size?: number; // px
+  size?: number;
+  onClick?: () => void;
 };
 
-export const Logo: React.FC<LogoProps> = ({ clickable = true, size = 40 }) => {
+export const Logo: React.FC<LogoProps> = ({
+  clickable = true,
+  size = 40,
+  onClick,
+}) => {
   const content = (
     <motion.div
       layoutId="app-logo"
@@ -29,11 +33,12 @@ export const Logo: React.FC<LogoProps> = ({ clickable = true, size = 40 }) => {
   if (!clickable) return content;
 
   return (
-    <Link
-      href="/"
-      className="pointer-events-auto flex items-center justify-center"
+    <button
+      type="button"
+      onClick={onClick}
+      className="pointer-events-auto flex items-center justify-center rounded-md focus:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
     >
       {content}
-    </Link>
+    </button>
   );
 };
