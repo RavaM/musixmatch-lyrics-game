@@ -14,7 +14,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShareResultsButton } from "@/components/ShareResultsButton";
 import { useSettingsStore } from "@/lib/store/settings";
-import { playCorrectSound, playWrongSound } from "@/lib/sound";
+import { useSound } from "@/lib/hooks/useSound";
 
 const FEEDBACK_DELAY = 2000;
 const MAX_TIME_PER_QUESTION = 20;
@@ -39,18 +39,17 @@ export default function PlayPage() {
   } = useGameStore();
   const { currentPlayer } = usePlayerStore();
   const { chartCountry } = useSettingsStore();
+  const { playCorrect, playWrong } = useSound();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
 
-  // Start game when player exists and game is idle
   useEffect(() => {
     if (status === "idle" && currentPlayer) {
       startGame();
     }
   }, [status, startGame, currentPlayer]);
 
-  // Timer
   useEffect(() => {
     if (status !== "in-progress") return;
     if (isFeedbackActive) return;
@@ -62,7 +61,6 @@ export default function PlayPage() {
     return () => clearInterval(interval);
   }, [status, tick, isFeedbackActive]);
 
-  // Reset game when leaving /play
   useEffect(() => {
     return () => {
       resetGame();
@@ -84,11 +82,10 @@ export default function PlayPage() {
     setIsLocked(true);
     setFeedbackActive(true);
 
-    // 🔊 sound
     if (isCorrect) {
-      playCorrectSound();
+      playCorrect();
     } else {
-      playWrongSound();
+      playWrong();
     }
 
     answerQuestion(answerId);

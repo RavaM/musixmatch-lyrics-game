@@ -1,38 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useSettingsStore } from "@/lib/store/settings";
+import { soundManager } from "@/lib/audio/soundManager";
 
 export function BackgroundMusic() {
-  const { soundEnabled } = useSettingsStore();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    if (!audioRef.current) {
-      const audio = new Audio("/sounds/bg-loop.mp3");
-      audio.loop = true;
-      audio.volume = 0.15;
-      audioRef.current = audio;
-    }
-
-    const audio = audioRef.current;
+    soundManager.setMuted(!soundEnabled);
 
     if (soundEnabled) {
-      audio
-        .play()
-        .catch((err) =>
-          console.warn("Background audio play blocked (autoplay)", err)
-        );
+      soundManager.playBgm();
     } else {
-      audio.pause();
+      soundManager.pauseBgm();
     }
-
-    return () => {
-      audio.pause();
-    };
   }, [soundEnabled]);
-
   return null;
 }

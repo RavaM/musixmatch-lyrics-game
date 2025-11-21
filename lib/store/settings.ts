@@ -8,6 +8,7 @@ type SettingsState = {
   setChartCountry: (country: ChartCountry) => void;
 
   soundEnabled: boolean;
+  setSoundEnabled: (value: boolean) => void;
   toggleSound: () => void;
 };
 
@@ -18,11 +19,15 @@ export const useSettingsStore = create<SettingsState>()(
       setChartCountry: (country) => set({ chartCountry: country }),
 
       soundEnabled: false,
+      setSoundEnabled: (value) => set({ soundEnabled: value }),
       toggleSound: () =>
         set((state) => ({ soundEnabled: !state.soundEnabled })),
     }),
     {
       name: "who-sings-settings",
+      partialize: (state) => ({
+        chartCountry: state.chartCountry,
+      }),
     }
   )
 );
