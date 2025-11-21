@@ -47,7 +47,7 @@ export const LeaderboardSection = ({
   currentPlayerName,
 }: LeaderboardSectionProps) => {
   return (
-    <section>
+    <section className="flex flex-col h-fit sm:flex-1">
       <motion.div
         className="flex items-center gap-2 mb-3"
         initial={{ opacity: 0, y: 8 }}

@@ -81,7 +81,7 @@ export default function LeaderboardPage() {
 
   return (
     <motion.main
-      className="min-h-screen text-white"
+      className="h-full text-white flex flex-col justify-start"
       initial="hidden"
       animate="visible"
     >
@@ -105,7 +105,7 @@ export default function LeaderboardPage() {
           No games played yet. Be the first to set a high score!
         </motion.p>
       ) : (
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="gap-8 md:grid-cols-2 overflow-y-auto pointer-events-auto flex-1 flex flex-col md:flex-row items-stretch">
           <LeaderboardSection
             title="US Leaderboard"
             flagSrc="/flags/us.png"

@@ -27,6 +27,7 @@ export default function PlayPage() {
   const bestStreak = useGameStore((s) => s.bestStreak);
   const answers = useGameStore((s) => s.answers);
   const error = useGameStore((s) => s.error);
+  const isFeedbackActive = useGameStore((s) => s.isFeedbackActive);
 
   const startGame = useGameStore((s) => s.startGame);
   const answerQuestion = useGameStore((s) => s.answerQuestion);
@@ -58,13 +59,14 @@ export default function PlayPage() {
 
   useEffect(() => {
     if (status !== "in-progress") return;
+    if (isFeedbackActive) return;
 
     const interval = setInterval(() => {
       tick();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [status, tick]);
+  }, [status, tick, isFeedbackActive]);
 
   const currentQuestion = questions[currentIndex];
 
@@ -281,7 +283,6 @@ export default function PlayPage() {
         </div>
 
         <StreakHeader />
-
         <TimerBar />
 
         <p className="font-display text-xl mb-6">
