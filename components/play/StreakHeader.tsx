@@ -1,19 +1,13 @@
+import { useGameStore } from "@/lib/store/game";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 
-type StreakHeaderProps = {
-  currentStreak: number;
-  bestStreak: number;
-};
-
-export const StreakHeader = ({
-  currentStreak,
-  bestStreak,
-}: StreakHeaderProps) => {
+export const StreakHeader = () => {
+  const { currentStreak, bestStreak } = useGameStore();
   return (
     <div className="flex justify-between items-center mb-4">
       <motion.div
-        key={currentStreak} // re-animate on streak change
+        key={currentStreak}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 18 }}

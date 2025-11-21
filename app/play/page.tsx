@@ -18,34 +18,29 @@ import { useSound } from "@/lib/hooks/useSound";
 import { useRouter } from "next/navigation";
 
 const FEEDBACK_DELAY = 2000;
-const MAX_TIME_PER_QUESTION = 20;
 
 export default function PlayPage() {
-  const {
-    status,
-    questions,
-    currentIndex,
-    timeLeft,
-    score,
-    currentStreak,
-    bestStreak,
-    isFeedbackActive,
-    answers,
-    error,
-    startGame,
-    tick,
-    answerQuestion,
-    resetGame,
-    goToNextQuestion,
-    setFeedbackActive,
-  } = useGameStore();
+  const status = useGameStore((s) => s.status);
+  const questions = useGameStore((s) => s.questions);
+  const currentIndex = useGameStore((s) => s.currentIndex);
+  const score = useGameStore((s) => s.score);
+  const bestStreak = useGameStore((s) => s.bestStreak);
+  const answers = useGameStore((s) => s.answers);
+  const error = useGameStore((s) => s.error);
+
+  const startGame = useGameStore((s) => s.startGame);
+  const answerQuestion = useGameStore((s) => s.answerQuestion);
+  const resetGame = useGameStore((s) => s.resetGame);
+  const goToNextQuestion = useGameStore((s) => s.goToNextQuestion);
+  const setFeedbackActive = useGameStore((s) => s.setFeedbackActive);
+  const tick = useGameStore((s) => s.tick);
+
   const { currentPlayer } = usePlayerStore();
   const { chartCountry } = useSettingsStore();
   const { playCorrect, playWrong } = useSound();
   const router = useRouter();
 
-  console.log("status is", status);
-
+  // local UI state
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
 
@@ -56,21 +51,20 @@ export default function PlayPage() {
   }, [status, startGame, currentPlayer]);
 
   useEffect(() => {
+    return () => {
+      resetGame();
+    };
+  }, [resetGame]);
+
+  useEffect(() => {
     if (status !== "in-progress") return;
-    if (isFeedbackActive) return;
 
     const interval = setInterval(() => {
       tick();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [status, tick, isFeedbackActive]);
-
-  useEffect(() => {
-    return () => {
-      resetGame();
-    };
-  }, [resetGame]);
+  }, [status, tick]);
 
   const currentQuestion = questions[currentIndex];
 
@@ -265,7 +259,10 @@ export default function PlayPage() {
 
   return (
     <main className="h-full flex text-white relative justify-center">
-      <div className="z-10 bg-background/70 border border-border rounded-2xl p-8 w-full max-w-md h-fit">
+      <div
+        className="z-10 bg-background/70 border border-border rounded-2xl p-8 w-full max-w-md h-fit"
+        key={currentQuestion.id}
+      >
         <div className="flex justify-between items-center mb-4 text-sm text-muted-foreground">
           <span>
             Question <span className="text-white">{currentIndex + 1}</span> /{" "}
@@ -283,9 +280,9 @@ export default function PlayPage() {
           </span>
         </div>
 
-        <StreakHeader currentStreak={currentStreak} bestStreak={bestStreak} />
+        <StreakHeader />
 
-        <TimerBar timeLeft={timeLeft} maxTime={MAX_TIME_PER_QUESTION} />
+        <TimerBar />
 
         <p className="font-display text-xl mb-6">
           “{currentQuestion.lyricLine}”

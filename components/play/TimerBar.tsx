@@ -1,12 +1,10 @@
+import { useGameStore } from "@/lib/store/game";
 import Counter from "../Counter";
 
-type TimerBarProps = {
-  timeLeft: number;
-  maxTime: number;
-};
-
-export const TimerBar = ({ timeLeft, maxTime }: TimerBarProps) => {
-  const width = (timeLeft / maxTime) * 100;
+export const TimerBar = () => {
+  const timeLeft = useGameStore((s) => s.timeLeft);
+  const maxTimePerQuestion = useGameStore((s) => s.maxTimePerQuestion);
+  const width = (timeLeft / maxTimePerQuestion) * 100;
 
   return (
     <div className="mb-4">
